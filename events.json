@@ -1,0 +1,55 @@
+{
+  "events": [
+    {
+      "event_id": "evt_001",
+      "event_type": "Fire",
+      "target_house": 2,
+      "start_time": 96,
+      "duration": 8,
+      "severity": 0.9,
+      "parameters": {}
+    },
+    {
+      "event_id": "evt_002",
+      "event_type": "FDI_temp",
+      "target_house": 5,
+      "start_time": 200,
+      "duration": 10,
+      "severity": 0.7,
+      "parameters": {
+        "sensor": "outdoor_temp",
+        "fake_val": 95.0
+      }
+    },
+    {
+      "event_id": "evt_003",
+      "event_type": "BBQ",
+      "target_house": 0,
+      "start_time": 310,
+      "duration": 4,
+      "severity": 0.6,
+      "parameters": {}
+    },
+    {
+      "event_id": "evt_004",
+      "event_type": "Smoking",
+      "target_house": 7,
+      "start_time": 450,
+      "duration": 2,
+      "severity": 0.5,
+      "parameters": {}
+    },
+    {
+      "event_id": "evt_005",
+      "event_type": "FDI_pm",
+      "target_house": 3,
+      "start_time": 600,
+      "duration": 6,
+      "severity": 0.8,
+      "parameters": {
+        "sensor": "outdoor_pm",
+        "fake_val": 320.0
+      }
+    }
+  ]
+}
