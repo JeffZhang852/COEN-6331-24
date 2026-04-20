@@ -1,6 +1,7 @@
 import uuid
 import numpy as np
 import json
+from environment.iot_env import SENSOR_INDICES
 
 EVENT_TYPE_FDI_TEMP = "FDI_temp"
 EVENT_TYPE_FDI_PM   = "FDI_pm"
@@ -58,14 +59,12 @@ def make_fdi_pm_event(target_house, start_time, duration, severity=0.5, fake_val
     }
 
 def apply_fdi_temp(observed, house_idx, severity, params=None):
-    from environment.iot_env import SENSOR_INDICES
     params   = params or {}
     fake_val = params.get('fake_val', compute_fdi_temp_value(severity))
     observed[house_idx, SENSOR_INDICES['out_temp']] = float(fake_val)
     return observed
 
 def apply_fdi_pm(observed, house_idx, severity, params=None):
-    from environment.iot_env import SENSOR_INDICES
     params   = params or {}
     fake_val = params.get('fake_val', compute_fdi_pm_value(severity))
     observed[house_idx, SENSOR_INDICES['out_pm']] = float(fake_val)
@@ -100,7 +99,7 @@ if __name__ == "__main__":
 
     #value derivation
     for sev in [0.0, 0.5, 1.0]:
-        print(f"  severity={sev:.1f}  →  temp={compute_fdi_temp_value(sev):.1f}°C,"
+        print(f"  severity={sev:.1f} → temp={compute_fdi_temp_value(sev):.1f}°C,"
               f"  pm={compute_fdi_pm_value(sev):.1f} µg/m³")
 
     #batch generator
