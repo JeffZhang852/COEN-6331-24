@@ -30,14 +30,13 @@ DATA_FILE    = "environment/environment_data_30days.txt"
 MODEL_PATH   = "models/iot_ddrl_model.zip"
 SCENARIO_FILE = "scenario.json"
 
-NUM_HOUSES          = 10
-SENSOR_NAMES        = ['Out Temp\n(°C)', 'Out Hum\n(%)', 'Out PM\n(µg/m³)',
-                       'In Temp\n(°C)',  'In Hum\n(%)',  'In PM\n(µg/m³)', 'Power\n(kW)']
-NUM_SENSORS         = len(SENSOR_NAMES)
-TIMESTEPS_PER_DAY   = 96
-TOTAL_DAYS          = 30
-TOTAL_STEPS         = TOTAL_DAYS * TIMESTEPS_PER_DAY
-HISTORY_LEN         = 8    # must match training
+NUM_HOUSES = 10
+SENSOR_NAMES = ['Out Temp\n(°C)', 'Out Hum\n(%)', 'Out PM\n(µg/m³)','In Temp\n(°C)',  'In Hum\n(%)',  'In PM\n(µg/m³)', 'Power\n(kW)']
+NUM_SENSORS = len(SENSOR_NAMES)
+TIMESTEPS_PER_DAY = 96
+TOTAL_DAYS = 30
+TOTAL_STEPS = TOTAL_DAYS * TIMESTEPS_PER_DAY
+HISTORY_LEN = 8    # must match training
 
 SENSOR_RANGES = {
     0: (10, 35),
@@ -91,9 +90,8 @@ def drl_ai_inference(model, baseline, current_step, house_id, observed):
     action, _ = model.predict(obs, deterministic=True)
     return ACTION_MAP.get(int(action), ("UNKNOWN", 0.0))
 
-
 def rule_based_inference(house_id, observed_row, neighbors_avg):
-    """fallback heuristic when no trained model is available"""
+    #fallback heuristic when no trained model is available
     out_temp = observed_row[0]
     out_pm   = observed_row[2]
     in_pm    = observed_row[5]
@@ -107,8 +105,7 @@ def rule_based_inference(house_id, observed_row, neighbors_avg):
     return "NORMAL", 0.99
 
 class SensorDashboard:
-    def __init__(self, baseline_data, drl_model=None,
-                 scenario=None, debug_mode=False):
+    def __init__(self, baseline_data, drl_model=None, scenario=None, debug_mode=False):
         self.baseline      = baseline_data
         self.drl_model     = drl_model
         self.debug_mode    = debug_mode
@@ -116,7 +113,7 @@ class SensorDashboard:
         self.paused        = True
         self.selected_house = 0
 
-        #build EventManager from scenario (or empty if none provided)
+        #build EventManager from scenario or empty if none provided
         self.scenario       = scenario
         self.event_manager  = (EventManager.from_scenario(scenario)
                                 if scenario else EventManager())
@@ -125,8 +122,7 @@ class SensorDashboard:
         self.fig = plt.figure(figsize=(16, 10))
         self.fig.canvas.manager.set_window_title('IoT Sensor Network Simulation')
 
-        gs = self.fig.add_gridspec(3, 2, height_ratios=[2, 1, 0.5],
-                                    width_ratios=[3, 1])
+        gs = self.fig.add_gridspec(3, 2, height_ratios=[2, 1, 0.5], width_ratios=[3, 1])
         self.ax_heatmap  = self.fig.add_subplot(gs[0, :])
         self.ax_ai       = self.fig.add_subplot(gs[1, 0])
         self.ax_info     = self.fig.add_subplot(gs[1, 1])
@@ -145,8 +141,7 @@ class SensorDashboard:
         observed  = self.event_manager.apply_overrides(self.baseline, self.current_step)
         norm_data = self._normalise(observed)
 
-        self.heatmap_img = self.ax_heatmap.imshow(
-            norm_data.T, cmap='RdYlGn_r', aspect='auto', vmin=0, vmax=1)
+        self.heatmap_img = self.ax_heatmap.imshow(norm_data.T, cmap='RdYlGn_r', aspect='auto', vmin=0, vmax=1)
         self.ax_heatmap.set_xticks(range(NUM_HOUSES))
         self.ax_heatmap.set_xticklabels([f'House {i+1}' for i in range(NUM_HOUSES)])
         self.ax_heatmap.set_yticks(range(NUM_SENSORS))
@@ -157,9 +152,7 @@ class SensorDashboard:
             for s in range(NUM_SENSORS):
                 val   = observed[h, s]
                 color = 'black' if 0.2 < norm_data[h, s] < 0.8 else 'white'
-                text  = self.ax_heatmap.text(h, s, f'{val:.1f}',
-                                              ha='center', va='center',
-                                              color=color, fontsize=8)
+                text  = self.ax_heatmap.text(h, s, f'{val:.1f}', ha='center', va='center', color=color, fontsize=8)
                 self.value_texts.append(text)
 
     def _init_info_panel(self):
@@ -195,7 +188,7 @@ class SensorDashboard:
 
         active = self.event_manager.get_active_events(self.current_step)
         if active:
-            ev    = active[0]
+            ev = active[0]
             lines.append(f"\nActive: {ev['event_type']}")
             lines.append(f"  House {ev['target_house']}  sev={ev.get('severity', 1.0):.2f}")
         return "\n".join(lines)
@@ -210,7 +203,7 @@ class SensorDashboard:
     def _update_heatmap_title(self):
         step = self.current_step
         self.ax_heatmap.set_title(
-            f"Step {step} / {TOTAL_STEPS}   "
+            f"Step {step} / {TOTAL_STEPS}"
             f"Day {step // 96 + 1}   {self._step_to_time(step)}"
         )
 
@@ -232,8 +225,7 @@ class SensorDashboard:
             for s in range(NUM_SENSORS):
                 val = observed[h, s]
                 self.value_texts[idx].set_text(f'{val:.1f}')
-                self.value_texts[idx].set_color(
-                    'black' if 0.2 < norm_data[h, s] < 0.8 else 'white')
+                self.value_texts[idx].set_color('black' if 0.2 < norm_data[h, s] < 0.8 else 'white')
                 idx += 1
 
         self._update_ai_panel(observed)
@@ -245,9 +237,7 @@ class SensorDashboard:
         self.ax_ai.axis('off')
 
         y_pos = 0.95
-        self.ax_ai.text(0.05, y_pos, "House  AI Decision",
-                         transform=self.ax_ai.transAxes,
-                         fontweight='bold', fontsize=10)
+        self.ax_ai.text(0.05, y_pos, "House  AI Decision", transform=self.ax_ai.transAxes, fontweight='bold', fontsize=10)
         y_pos -= 0.06
 
         for h in range(NUM_HOUSES):
@@ -270,9 +260,7 @@ class SensorDashboard:
                      "purple" if "ISOLATE"  in decision or "FDI" in decision else
                      "black")
 
-            self.ax_ai.text(0.05, y_pos, f"House {h+1:2d}: {decision} ({conf:.0%})",
-                             transform=self.ax_ai.transAxes,
-                             fontsize=9, color=color, family='monospace')
+            self.ax_ai.text(0.05, y_pos, f"House {h+1:2d}: {decision} ({conf:.0%})", transform=self.ax_ai.transAxes, fontsize=9, color=color, family='monospace')
             y_pos -= 0.055
 
     def on_key_press(self, event):
@@ -301,11 +289,11 @@ class SensorDashboard:
         #debug-only event injection
         elif self.debug_mode:
             if k == 'f1':
-                self._debug_inject('Fire',    12)
+                self._debug_inject('Fire', 12)
             elif k == 'f2':
-                self._debug_inject('BBQ',      4)
+                self._debug_inject('BBQ', 4)
             elif k == 'f3':
-                self._debug_inject('Smoking',  2)
+                self._debug_inject('Smoking', 2)
             elif k == 'f4':
                 self._debug_inject_fdi()
 
