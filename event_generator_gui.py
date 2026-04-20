@@ -6,9 +6,9 @@ import argparse
 import os
 
 #supported event types and which extra field each needs
-EVENT_TYPES      = ["Fire", "BBQ", "Smoking", "FDI_temp", "FDI_pm"]
-FDI_EVENT_TYPES  = {"FDI_temp", "FDI_pm"}
-FDI_SENSORS      = {
+EVENT_TYPES = ["Fire", "BBQ", "Smoking", "FDI_temp", "FDI_pm"]
+FDI_EVENT_TYPES = {"FDI_temp", "FDI_pm"}
+FDI_SENSORS = {
     "FDI_temp": ["outdoor_temp", "indoor_temp"],
     "FDI_pm":   ["outdoor_pm",  "indoor_pm"],
 }
@@ -42,11 +42,10 @@ class EventGeneratorApp:
         self.root.columnconfigure(1, weight=2)
         self.root.rowconfigure(0, weight=1)
 
-        #left panel: form
+        #left panel form
         form_frame = ttk.LabelFrame(self.root, text=" Event Properties ", padding=10)
         form_frame.grid(row=0, column=0, sticky="nsew", padx=(10, 5), pady=10)
         form_frame.columnconfigure(1, weight=1)
-
         row = 0
 
         #event type
@@ -85,8 +84,7 @@ class EventGeneratorApp:
         row += 1
 
         #severity slider (synced to entry)
-        self.sev_slider = ttk.Scale(form_frame, from_=0.0, to=1.0, orient="horizontal",
-                                    command=self._on_slider_move)
+        self.sev_slider = ttk.Scale(form_frame, from_=0.0, to=1.0, orient="horizontal", command=self._on_slider_move)
         self.sev_slider.set(self.var_severity.get())
         self.sev_slider.grid(row=row, column=0, columnspan=2, sticky="ew", pady=(0, 6))
         row += 1
@@ -95,12 +93,11 @@ class EventGeneratorApp:
         self.lbl_sensor = ttk.Label(form_frame, text="Sensor Target:")
         self.lbl_sensor.grid(row=row, column=0, sticky="w", pady=3)
         self.var_sensor  = tk.StringVar(value=FDI_SENSORS["FDI_temp"][0])
-        self.cb_sensor   = ttk.Combobox(form_frame, textvariable=self.var_sensor,
-                                        values=FDI_SENSORS["FDI_temp"], state="readonly", width=14)
+        self.cb_sensor   = ttk.Combobox(form_frame, textvariable=self.var_sensor, values=FDI_SENSORS["FDI_temp"], state="readonly", width=14)
         self.cb_sensor.grid(row=row, column=1, sticky="ew", pady=3)
         row += 1
 
-        #fake value (FDI only, optional)
+        #fake value - FDI only
         self.lbl_fakeval = ttk.Label(form_frame, text="Fake Value (opt.):")
         self.lbl_fakeval.grid(row=row, column=0, sticky="w", pady=3)
         self.var_fakeval = tk.StringVar(value="")
@@ -108,8 +105,7 @@ class EventGeneratorApp:
         self.ent_fakeval.grid(row=row, column=1, sticky="w", pady=3)
         row += 1
 
-        ttk.Separator(form_frame, orient="horizontal").grid(
-            row=row, column=0, columnspan=2, sticky="ew", pady=8)
+        ttk.Separator(form_frame, orient="horizontal").grid(row=row, column=0, columnspan=2, sticky="ew", pady=8)
         row += 1
 
         #buttons
@@ -123,22 +119,19 @@ class EventGeneratorApp:
         ttk.Button(btn_frame, text="  Clear All", command=self._clear_all).grid(row=1, column=1, sticky="ew", padx=2, pady=2)
         row += 1
 
-        ttk.Separator(form_frame, orient="horizontal").grid(
-            row=row, column=0, columnspan=2, sticky="ew", pady=8)
+        ttk.Separator(form_frame, orient="horizontal").grid(row=row, column=0, columnspan=2, sticky="ew", pady=8)
         row += 1
         io_frame = ttk.Frame(form_frame)
         io_frame.grid(row=row, column=0, columnspan=2, sticky="ew")
         io_frame.columnconfigure((0, 1), weight=1)
 
-        ttk.Button(io_frame, text=" Save JSON",
-                   command=self._save_json).grid(row=0, column=0, sticky="ew", padx=2, pady=2)
-        ttk.Button(io_frame, text=" Load JSON",
-                   command=self._load_json).grid(row=0, column=1, sticky="ew", padx=2, pady=2)
+        ttk.Button(io_frame, text=" Save JSON", command=self._save_json).grid(row=0, column=0, sticky="ew", padx=2, pady=2)
+        ttk.Button(io_frame, text=" Load JSON", command=self._load_json).grid(row=0, column=1, sticky="ew", padx=2, pady=2)
 
-        #initially hide FDI-specific fields if not in FDI mode
+        #initially hide FDI specific fields if not in FDI mode
         self._on_type_change()
 
-        #right panel: event list
+        #right panel event list
         list_frame = ttk.LabelFrame(self.root, text=" Event List ", padding=10)
         list_frame.grid(row=0, column=1, sticky="nsew", padx=(5, 10), pady=10)
         list_frame.rowconfigure(0, weight=1)
@@ -167,20 +160,18 @@ class EventGeneratorApp:
         self.tree.grid(row=0, column=0, sticky="nsew")
         vsb.grid(row=0, column=1, sticky="ns")
         hsb.grid(row=1, column=0, sticky="ew")
-
+        
         self.tree.bind("<<TreeviewSelect>>", self._on_select)
 
         #status bar
         self.status_var = tk.StringVar(value="Ready. Add events using the form.")
-        ttk.Label(self.root, textvariable=self.status_var,
-                  relief="sunken", anchor="w").grid(
-            row=1, column=0, columnspan=2, sticky="ew", padx=10, pady=(0, 6))
+        ttk.Label(self.root, textvariable=self.status_var, relief="sunken", anchor="w").grid(row=1, column=0, columnspan=2, sticky="ew", padx=10, pady=(0, 6))
       
     def _on_type_change(self, _event=None):
         etype = self.var_type.get()
         is_fdi = etype in FDI_EVENT_TYPES
 
-        #show/hide FDI-only rows
+        #show-hide FDI only rows
         state = "normal" if is_fdi else "disabled"
         self.lbl_sensor.configure(state=state)
         self.cb_sensor.configure(state="readonly" if is_fdi else "disabled")
@@ -215,7 +206,7 @@ class EventGeneratorApp:
                 return
 
     def _populate_form(self, ev):
-        """fill form fields from an event dict"""
+        #fill form fields from an event dict
         self.var_type.set(ev['event_type'])
         self._on_type_change()
         self.var_house.set(ev['target_house'])
@@ -229,7 +220,7 @@ class EventGeneratorApp:
         self.var_fakeval.set(str(fv) if fv != '' else '')
 
     def _collect_form(self):
-        """Validate and collect form data.  Returns event dict or None."""
+        #validate and collect form data - returns event dict or None"""
         etype = self.var_type.get()
 
         try:
@@ -371,11 +362,10 @@ class EventGeneratorApp:
             messagebox.showerror("Load Error", "Unrecognised JSON structure.")
             return
 
-        if self.events and not messagebox.askyesno(
-                "Replace?", f"Replace current {len(self.events)} event(s) with {len(loaded)} loaded?"):
+        if self.events and not messagebox.askyesno("Replace?", f"Replace current {len(self.events)} event(s) with {len(loaded)} loaded?"):
             return
 
-        self.events       = loaded
+        self.events = loaded
         self.selected_idx = None
         self._refresh_list()
         self._status(f"Loaded {len(loaded)} event(s) from {path}")
