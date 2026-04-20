@@ -5,11 +5,11 @@ import os
 import argparse
 
 #timeline display constants
-NUM_HOUSES       = 10
+NUM_HOUSES = 10
 TIMELINE_PADDING = 40          # pixels on left for house labels
-LANE_HEIGHT      = 28          # pixels per house lane
-TIMELINE_HEIGHT  = NUM_HOUSES * LANE_HEIGHT + 20
-TICK_INTERVAL    = 96          # one day = 96 timesteps → one major tick
+LANE_HEIGHT = 28          # pixels per house lane
+TIMELINE_HEIGHT = NUM_HOUSES * LANE_HEIGHT + 20
+TICK_INTERVAL = 96          # one day = 96 timesteps → one major tick
 
 TYPE_COLORS = {
     "Fire":    "#e03030",
@@ -28,9 +28,9 @@ EDIT_FIELDS = [
 
 class EventSchedulerApp:
     def __init__(self, root, output_path="scenario.json"):
-        self.root        = root
+        self.root = root
         self.output_path = output_path
-        self.events      = []
+        self.events = []
         self.selected_idx = None         # index into self.events
 
         self.root.title("IoT Event Scheduler")
@@ -41,7 +41,7 @@ class EventSchedulerApp:
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(1, weight=1)
 
-        #top bar: scenario metadata + I/O
+        #top bar scenario metadata + I/O
         top = ttk.Frame(self.root, padding=8)
         top.grid(row=0, column=0, sticky="ew")
         top.columnconfigure(3, weight=1)
@@ -57,7 +57,7 @@ class EventSchedulerApp:
         ttk.Button(top, text=" Load Events",  command=self._load_events).grid(row=0, column=4, padx=2)
         ttk.Button(top, text=" Save Scenario", command=self._save_scenario).grid(row=0, column=5, padx=2)
 
-        #main pane: list (left) + edit + timeline (right)
+        #main pane list left + edit + timeline right
         main = ttk.PanedWindow(self.root, orient="horizontal")
         main.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 4))
 
@@ -78,11 +78,9 @@ class EventSchedulerApp:
 
         self._build_timeline(right_frame)
 
-        #bottom: status bar
+        #bottom status bar
         self.status_var = tk.StringVar(value="Load an events.json file to begin.")
-        ttk.Label(self.root, textvariable=self.status_var,
-                  relief="sunken", anchor="w").grid(
-            row=2, column=0, sticky="ew", padx=8, pady=(0, 6))
+        ttk.Label(self.root, textvariable=self.status_var, relief="sunken", anchor="w").grid(row=2, column=0, sticky="ew", padx=8, pady=(0, 6))
 
     def _build_list(self, parent):
         list_frame = ttk.LabelFrame(parent, text=" Events ", padding=4)
@@ -91,23 +89,22 @@ class EventSchedulerApp:
         list_frame.columnconfigure(0, weight=1)
 
         cols = ("id", "type", "house", "start", "dur", "sev")
-        self.tree = ttk.Treeview(list_frame, columns=cols, show="headings",
-                                  selectmode="browse", height=12)
-        self.tree.heading("id",    text="Event ID")
-        self.tree.heading("type",  text="Type")
+        self.tree = ttk.Treeview(list_frame, columns=cols, show="headings", selectmode="browse", height=12)
+        self.tree.heading("id", text="Event ID")
+        self.tree.heading("type", text="Type")
         self.tree.heading("house", text="House")
         self.tree.heading("start", text="Start")
-        self.tree.heading("dur",   text="Dur.")
-        self.tree.heading("sev",   text="Sev.")
+        self.tree.heading("dur", text="Dur.")
+        self.tree.heading("sev", text="Sev.")
 
-        self.tree.column("id",    width=130, anchor="w")
-        self.tree.column("type",  width=85,  anchor="center")
+        self.tree.column("id", width=130, anchor="w")
+        self.tree.column("type", width=85,  anchor="center")
         self.tree.column("house", width=45,  anchor="center")
         self.tree.column("start", width=55,  anchor="center")
-        self.tree.column("dur",   width=45,  anchor="center")
-        self.tree.column("sev",   width=45,  anchor="center")
+        self.tree.column("dur", width=45,  anchor="center")
+        self.tree.column("sev", width=45,  anchor="center")
 
-        vsb = ttk.Scrollbar(list_frame, orient="vertical",   command=self.tree.yview)
+        vsb = ttk.Scrollbar(list_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=vsb.set)
         self.tree.grid(row=0, column=0, sticky="nsew")
         vsb.grid(row=0, column=1, sticky="ns")
@@ -116,12 +113,9 @@ class EventSchedulerApp:
         btn_row = ttk.Frame(list_frame)
         btn_row.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(4, 0))
         btn_row.columnconfigure((0, 1, 2), weight=1)
-        ttk.Button(btn_row, text="↑↓ Sort by Start",
-                   command=self._sort_events).grid(row=0, column=0, sticky="ew", padx=2)
-        ttk.Button(btn_row, text="🗑 Remove",
-                   command=self._remove_event).grid(row=0, column=1, sticky="ew", padx=2)
-        ttk.Button(btn_row, text="🧹 Clear All",
-                   command=self._clear_all).grid(row=0, column=2, sticky="ew", padx=2)
+        ttk.Button(btn_row, text="↑↓ Sort by Start", command=self._sort_events).grid(row=0, column=0, sticky="ew", padx=2)
+        ttk.Button(btn_row, text=" Remove", command=self._remove_event).grid(row=0, column=1, sticky="ew", padx=2)
+        ttk.Button(btn_row, text=" Clear All", command=self._clear_all).grid(row=0, column=2, sticky="ew", padx=2)
 
     def _build_editor(self, parent):
         editor = ttk.LabelFrame(parent, text=" Edit Selected Event ", padding=6)
@@ -135,14 +129,11 @@ class EventSchedulerApp:
             ttk.Entry(editor, textvariable=var, width=12).grid(row=r, column=1, sticky="w", pady=2)
             self._edit_vars[field] = (var, dtype)
 
-        ttk.Button(editor, text="✔  Apply Changes",
-                   command=self._apply_edit).grid(row=len(EDIT_FIELDS), column=0,
-                                                   columnspan=2, sticky="ew", pady=(6, 2))
+        ttk.Button(editor, text=" Apply Changes", command=self._apply_edit).grid(row=len(EDIT_FIELDS), column=0, columnspan=2, sticky="ew", pady=(6, 2))
       
     def _build_timeline(self, parent):
-        # Scrollable canvas
-        self.tl_canvas = tk.Canvas(parent, bg="#1e1e2e", height=TIMELINE_HEIGHT + 30,
-                                   cursor="hand2")
+        #scrollable canvas
+        self.tl_canvas = tk.Canvas(parent, bg="#1e1e2e", height=TIMELINE_HEIGHT + 30, cursor="hand2")
         h_scroll = ttk.Scrollbar(parent, orient="horizontal", command=self.tl_canvas.xview)
         self.tl_canvas.configure(xscrollcommand=h_scroll.set)
 
@@ -161,9 +152,9 @@ class EventSchedulerApp:
             c.create_text(200, 60, text="No events loaded.", fill="#888", font=("monospace", 12))
             return
 
-        max_time     = max((ev['start_time'] + ev['duration']) for ev in self.events)
+        max_time = max((ev['start_time'] + ev['duration']) for ev in self.events)
         display_time = max(max_time + 48, 288)     # at least 3 days visible
-        canvas_w     = max(c.winfo_width() - 20, 600)
+        canvas_w = max(c.winfo_width() - 20, 600)
         pixels_per_t = (canvas_w - TIMELINE_PADDING) / display_time
 
         #update scroll region
@@ -172,11 +163,10 @@ class EventSchedulerApp:
 
         #house lane backgrounds
         for h in range(NUM_HOUSES):
-            y      = h * LANE_HEIGHT + 20
-            bg     = "#2a2a3e" if h % 2 == 0 else "#22223a"
+            y = h * LANE_HEIGHT + 20
+            bg = "#2a2a3e" if h % 2 == 0 else "#22223a"
             c.create_rectangle(0, y, total_w, y + LANE_HEIGHT, fill=bg, outline="")
-            c.create_text(TIMELINE_PADDING - 4, y + LANE_HEIGHT // 2,
-                          text=f"H{h}", fill="#aaa", anchor="e", font=("monospace", 9))
+            c.create_text(TIMELINE_PADDING - 4, y + LANE_HEIGHT // 2, text=f"H{h}", fill="#aaa", anchor="e", font=("monospace", 9))
 
         #day tick marks
         day = 0
@@ -190,39 +180,34 @@ class EventSchedulerApp:
 
         #event blocks
         for i, ev in enumerate(self.events):
-            h       = ev['target_house']
-            start   = ev['start_time']
-            dur     = ev['duration']
-            etype   = ev['event_type']
-            sev     = ev.get('severity', 1.0)
+            h = ev['target_house']
+            start = ev['start_time']
+            dur = ev['duration']
+            etype = ev['event_type']
+            sev = ev.get('severity', 1.0)
 
             x1 = TIMELINE_PADDING + start * pixels_per_t
             x2 = TIMELINE_PADDING + (start + dur) * pixels_per_t
             y1 = h * LANE_HEIGHT + 22
             y2 = y1 + LANE_HEIGHT - 4
 
-            color   = TYPE_COLORS.get(etype, "#888")
+            color = TYPE_COLORS.get(etype, "#888")
             outline = "#ffffff" if i == self.selected_idx else color
-            lw      = 2         if i == self.selected_idx else 1
+            lw  = 2  if i == self.selected_idx else 1
             alpha_color = color  # canvas doesn't support real alpha, use solid
 
-            block = c.create_rectangle(x1, y1, x2, y2, fill=alpha_color,
-                                        outline=outline, width=lw, tags=f"ev_{i}")
+            block = c.create_rectangle(x1, y1, x2, y2, fill=alpha_color, outline=outline, width=lw, tags=f"ev_{i}")
             label = etype[:3]
             if x2 - x1 > 18:
-                c.create_text((x1 + x2) / 2, (y1 + y2) / 2,
-                               text=label, fill="white",
-                               font=("monospace", 8, "bold"), tags=f"ev_{i}")
+                c.create_text((x1 + x2) / 2, (y1 + y2) / 2, text=label, fill="white", font=("monospace", 8, "bold"), tags=f"ev_{i}")
 
             # Severity bar at bottom of block
             bar_h = max(2, int((y2 - y1 - 4) * sev))
-            c.create_rectangle(x1 + 1, y2 - bar_h - 1, x1 + 3, y2 - 1,
-                                fill="white", outline="", tags=f"ev_{i}")
+            c.create_rectangle(x1 + 1, y2 - bar_h - 1, x1 + 3, y2 - 1, fill="white", outline="", tags=f"ev_{i}")
 
     def _on_timeline_click(self, event):
         #find which event block was clicked
-        overlapping = self.tl_canvas.find_overlapping(
-            event.x - 2, event.y - 2, event.x + 2, event.y + 2)
+        overlapping = self.tl_canvas.find_overlapping(event.x - 2, event.y - 2, event.x + 2, event.y + 2)
         for item in overlapping:
             tags = self.tl_canvas.gettags(item)
             for tag in tags:
@@ -351,10 +336,9 @@ class EventSchedulerApp:
             messagebox.showerror("Load Error", "Unrecognised JSON structure.")
             return
 
-        if self.events and not messagebox.askyesno(
-                "Replace?", f"Replace current {len(self.events)} event(s) with {len(loaded)} loaded?"):
+        if self.events and not messagebox.askyesno("Replace?", f"Replace current {len(self.events)} event(s) with {len(loaded)} loaded?"):
             return
-        self.events       = loaded
+        self.events = loaded
         self.selected_idx = None
         self._refresh_list()
         self._draw_timeline()
@@ -374,8 +358,8 @@ class EventSchedulerApp:
 
         scenario = {
             "scenario_name": self.var_name.get().strip() or "scenario_1",
-            "description":   self.var_desc.get().strip(),
-            "events":        self.events,
+            "description": self.var_desc.get().strip(),
+            "events": self.events,
         }
         with open(path, 'w') as f:
             json.dump(scenario, f, indent=2)
