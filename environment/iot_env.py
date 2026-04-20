@@ -41,7 +41,7 @@ EVENT_TYPE_TO_CODE = {
 EVENT_CODE_TO_TYPE = {v: k for k, v in EVENT_TYPE_TO_CODE.items()}
 
 def load_scenario(filepath):
-    """Load a scenario dict (or bare events list) from a JSON file."""
+    """load scenario dict or bare events list from a JSON file"""
     with open(filepath, 'r') as f:
         return json.load(f)
 
@@ -115,7 +115,7 @@ class EventManager:
         return observed
 
     def _apply_event_effect(self, observed, ev, step):
-        """apply one event's sensor effect to observed array"""
+        """apply 1 event sensor effect to observed array"""
         h         = ev['target_house']
         etype     = ev['event_type']
         severity  = float(ev.get('severity', 1.0))
@@ -127,17 +127,17 @@ class EventManager:
             #temperature rises gradually then plateaus PM spikes immediately
             temp_rise = min(severity * 25.0, step_in * 8.0 + severity * 3.0)
             observed[h, si['out_temp']] += temp_rise
-            observed[h, si['in_temp']]  += temp_rise * 0.8
-            observed[h, si['out_hum']]   = max(20.0, observed[h, si['out_hum']] - severity * 20.0)
-            observed[h, si['in_hum']]    = max(20.0, observed[h, si['in_hum']]  - severity * 20.0)
+            observed[h, si['in_temp']] += temp_rise * 0.8
+            observed[h, si['out_hum']] = max(20.0, observed[h, si['out_hum']] - severity * 20.0)
+            observed[h, si['in_hum']] = max(20.0, observed[h, si['in_hum']]  - severity * 20.0)
             pm = severity * 500.0
             observed[h, si['out_pm']] = pm
-            observed[h, si['in_pm']]  = pm
+            observed[h, si['in_pm']] = pm
 
         elif etype == 'BBQ':
             observed[h, si['out_temp']] += severity * 3.0
-            observed[h, si['out_hum']]   = max(20.0, observed[h, si['out_hum']] - severity * 5.0)
-            observed[h, si['out_pm']]   += severity * 150.0
+            observed[h, si['out_hum']] = max(20.0, observed[h, si['out_hum']] - severity * 5.0)
+            observed[h, si['out_pm']] += severity * 150.0
 
         elif etype == 'Smoking':
             observed[h, si['in_pm']] += severity * 80.0
@@ -154,8 +154,7 @@ class EventManager:
 class IoTDefenderEnv(gym.Env):
     metadata = {'render_modes': ['human'], 'render_fps': 4}
 
-    def __init__(self, baseline_data, house_id, event_manager=None,
-                 history_len=8, max_steps=None):
+    def __init__(self, baseline_data, house_id, event_manager=None, history_len=8, max_steps=None):
         super().__init__()
 
         self.baseline     = baseline_data   # shape: steps, houses, sensors
@@ -167,9 +166,7 @@ class IoTDefenderEnv(gym.Env):
 
         #flattened local history + neighbour averages
         obs_dim = self.history_len * NUM_SENSORS + NUM_SENSORS
-        self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
-        )
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
         self.action_space = spaces.Discrete(NUM_ACTIONS)
 
         #internal state
@@ -183,7 +180,7 @@ class IoTDefenderEnv(gym.Env):
         self.correct_isolations = 0
 
     def set_scenario(self, scenario):
-        """Replace the event schedule from a scenario dict or list."""
+        """replace event schedule from scenario dict or list"""
         self.event_manager.set_scenario(scenario)
 
     def _get_observed_data(self):
