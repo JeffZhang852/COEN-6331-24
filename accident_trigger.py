@@ -1,6 +1,7 @@
 import uuid
 import numpy as np
 import json
+from environment.iot_env import SENSOR_INDICES
 
 EVENT_TYPE_FIRE    = "Fire"
 EVENT_TYPE_BBQ     = "BBQ"
@@ -46,9 +47,7 @@ def make_smoking_event(target_house, start_time, duration, severity=0.5, event_i
     }
 
 def apply_fire_effect(observed, house_idx, severity, step_in_event=0):
-    from environment.iot_env import SENSOR_INDICES
     si = SENSOR_INDICES
-
     temp_rise = min(severity * 25.0, step_in_event * 8.0 + severity * 3.0)
     observed[house_idx, si['out_temp']] += temp_rise
     observed[house_idx, si['in_temp']]  += temp_rise * 0.8
@@ -60,7 +59,6 @@ def apply_fire_effect(observed, house_idx, severity, step_in_event=0):
     return observed
 
 def apply_bbq_effect(observed, house_idx, severity):
-    from environment.iot_env import SENSOR_INDICES
     si = SENSOR_INDICES
     observed[house_idx, si['out_temp']] += severity * 3.0
     observed[house_idx, si['out_hum']]   = max(20.0, observed[house_idx, si['out_hum']] - severity * 5.0)
@@ -68,7 +66,6 @@ def apply_bbq_effect(observed, house_idx, severity):
     return observed
 
 def apply_smoking_effect(observed, house_idx, severity):
-    from environment.iot_env import SENSOR_INDICES
     observed[house_idx, SENSOR_INDICES['in_pm']] += severity * 80.0
     return observed
 
@@ -76,7 +73,7 @@ def generate_accident_scenario(num_events=5, total_steps=2880, num_houses=10, se
     rng    = np.random.RandomState(seed)
     events = []
     event_types   = [EVENT_TYPE_FIRE, EVENT_TYPE_BBQ, EVENT_TYPE_SMOKING]
-    event_weights = [0.20, 0.40, 0.40]   # fewer fires, more everyday events
+    event_weights = [0.20, 0.40, 0.40]   # fewer fires more everyday events
 
     for _ in range(num_events):
         etype    = rng.choice(event_types, p=event_weights)
@@ -101,8 +98,8 @@ if __name__ == "__main__":
     ev2 = make_bbq_event(target_house=4, start_time=300, duration=4, severity=0.65)
     ev3 = make_smoking_event(target_house=7, start_time=500, duration=2, severity=0.5)
     
-  print("Fire event:    ", json.dumps(ev1, indent=2))
-    print("BBQ event:     ", json.dumps(ev2, indent=2))
+    print("Fire event:", json.dumps(ev1, indent=2))
+    print("BBQ event: ", json.dumps(ev2, indent=2))
     print("Smoking event: ", json.dumps(ev3, indent=2))
 
     #batch generator
